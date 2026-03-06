@@ -15,11 +15,11 @@ public class Logistica
 
     public void EjecutarEntrega(string tipoTransporte)
     {
-        ITransporte transporte = CrearTransporte(tipoTransporte);
+        Transporte transporte = CrearTransporte(tipoTransporte);
         transporte.Entregar();
     }
 
-    private ITransporte CrearTransporte(string tipoTransporte)
+    private Transporte CrearTransporte(string tipoTransporte)
     {
         switch (tipoTransporte.ToLower())
         {
@@ -33,23 +33,23 @@ public class Logistica
     }
 }
 
-public class Camion : ITransporte
+public abstract class Transporte
 {
-    public  void Entregar()
+    public abstract void Entregar();
+}
+
+public class Camion : Transporte
+{
+    public override void Entregar()
     {
         Console.WriteLine("Entregando por tierra");
     }
 }
 
-public class Barco  : ITransporte
+public class Barco : Transporte
 {
-    public void Entregar()
+    public override void Entregar()
     {
         Console.WriteLine("Entregando por mar");
     }
-}
-
-public interface ITransporte
-{
-    void Entregar();
 }
