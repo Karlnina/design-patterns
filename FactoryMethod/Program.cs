@@ -1,10 +1,11 @@
 ﻿Console.WriteLine("Sistema de Logistica de entrega");
 
-Logistica logistica = new Logistica("Empresa XYZ");
-logistica.EjecutarEntrega("camion");
-logistica.EjecutarEntrega("barco");
+Logistica logisticaTerreste = new LogisticaCamion("Empresa XYZ");
+logisticaTerreste.EjecutarEntrega();
+Logistica logisticaMaritima = new LogisticaBarco("Empresa XYZ");
+logisticaMaritima.EjecutarEntrega();
 
-public class Logistica
+public abstract class Logistica
 {
     public string NombreEmpresa { get; set; }
 
@@ -13,43 +14,59 @@ public class Logistica
         NombreEmpresa = nombreEmpresa;
     }
 
-    public void EjecutarEntrega(string tipoTransporte)
+    public void EjecutarEntrega()
     {
-        Transporte transporte = CrearTransporte(tipoTransporte);
+        Console.WriteLine($"Iniciando proceso de entrega para {NombreEmpresa}");
+        ITransporte transporte = CrearTransporte();
         transporte.Entregar();
     }
 
-    private Transporte CrearTransporte(string tipoTransporte)
-    {
-        switch (tipoTransporte.ToLower())
-        {
-            case "camion":
-                return new Camion();
-            case "barco":
-                return new Barco();
-            default:
-                throw new ArgumentException("Tipo de transporte no válido");
-        }
-    }
+    protected abstract ITransporte CrearTransporte();
+
 }
 
-public abstract class Transporte
-{
-    public abstract void Entregar();
-}
 
-public class Camion : Transporte
+public class Camion : ITransporte
 {
-    public override void Entregar()
+    public void Entregar()
     {
         Console.WriteLine("Entregando por tierra");
     }
 }
 
-public class Barco : Transporte
+public class Barco : ITransporte
 {
-    public override void Entregar()
+    public void Entregar()
     {
         Console.WriteLine("Entregando por mar");
+    }
+}
+
+public interface ITransporte
+{
+    void Entregar();
+}
+
+public class LogisticaCamion : Logistica
+{
+    public LogisticaCamion(string nombreEmpresa) : base(nombreEmpresa)
+    {
+    }
+
+    protected override ITransporte CrearTransporte()
+    {
+        return new Camion();
+    }
+}
+
+public class LogisticaBarco : Logistica
+{
+    public LogisticaBarco(string nombreEmpresa) : base(nombreEmpresa)
+    {
+    }
+
+    protected override ITransporte CrearTransporte()
+    {
+        return new Barco();
     }
 }
