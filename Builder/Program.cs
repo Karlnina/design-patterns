@@ -32,89 +32,79 @@ Console.WriteLine("Construyendo una computadora para servidor...");
 // computadoraPersonalizada.MostrarEspecificaciones();
 
 
-var director = new Director();
-var computadoraServidor = director.ConstruirServidor(new Computadora.Builder());
-computadoraServidor.MostrarEspecificaciones();
+// var director = new Director();
+// var computadoraServidor = director.ConstruirServidor(new Computadora.Builder());
+// computadoraServidor.MostrarEspecificaciones();
 
-try
+// try
+// {
+//     Console.WriteLine("\nConstruyendo una computadora de escritorio...");
+//     var computadoraEscritorio = director.ConstruirComputadora(new Computadora.Builder());
+//     computadoraEscritorio.MostrarEspecificaciones();
+// }
+// catch (InvalidOperationException ex)
+// {
+//     Console.WriteLine($"Error: {ex.Message}");
+// }
+
+var computadora = new ComputadoraRecord.Builder();
+computadora.ConfigurarCPU("Intel Core i9-11900K");
+computadora.ConfigurarRAM("32GB");
+computadora.ConfigurarAlmacenamiento("1TB SSD");
+ComputadoraRecord computadoraPersonalizada = computadora.BuilderComputadora();
+computadoraPersonalizada.MostrarEspecificaciones();
+
+public record ComputadoraRecord(string CPU, string RAM, string Almacenamiento, bool EsGamer)
 {
-    Console.WriteLine("\nConstruyendo una computadora de escritorio...");
-    var computadoraEscritorio = director.ConstruirComputadora(new Computadora.Builder());
-    computadoraEscritorio.MostrarEspecificaciones();
-}
-catch (InvalidOperationException ex)
-{
-    Console.WriteLine($"Error: {ex.Message}");
-}
-
-
-public class Computadora
-{
-    public string CPU { get; set; } = "Generico";
-    public string RAM { get; set; }
-    public string Almacenamiento { get; set; } = "HDD";
-    public bool EsGamer { get; set; }
-
-    public class Builder
-    {
-        private Computadora computadora = new Computadora();
-
-        public void ConfigurarCPU(string cpu)
-        {
-            computadora.CPU = cpu;
-        }
-
-        public void ConfigurarRAM(string ram)
-        {
-            computadora.RAM = ram;
-        }
-
-        public void ConfigurarAlmacenamiento(string almacenamiento)
-        {
-            computadora.Almacenamiento = almacenamiento;
-        }
-
-        public void ConfigurarEsGamer(bool esGamer)
-        {
-            computadora.EsGamer = esGamer;
-        }
-
-        public Computadora BuilderComputadora()
-        {
-            if (string.IsNullOrEmpty(computadora.RAM))
-            {
-                throw new InvalidOperationException("La RAM es un campo obligatorio.");
-            }
-
-            return computadora;
-        }
-    }
-
     public void MostrarEspecificaciones()
     {
         Console.WriteLine($"CPU: {CPU}");
         Console.WriteLine($"RAM: {RAM}");
         Console.WriteLine($"Almacenamiento: {Almacenamiento}");
-        Console.WriteLine($"Es Gamer: {EsGamer}");
-    }
-}
-
-
-public class Director
-{
-    public Computadora ConstruirComputadora(Computadora.Builder builder)
-    {
-        builder.ConfigurarAlmacenamiento("1TB SSD");
-        builder.ConfigurarEsGamer(true);
-        return builder.BuilderComputadora();
+        Console.WriteLine($"Es Gamer: {(EsGamer ? "Sí" : "No")}");
     }
 
-    public Computadora ConstruirServidor(Computadora.Builder builder)
+    public ComputadoraRecord(string CPU, string RAM, string Almacenamiento) : this(CPU ?? throw new ArgumentNullException("CPU debe ser configurado"), RAM, Almacenamiento, false)
     {
-        builder.ConfigurarCPU("AMD EPYC 7742");
-        builder.ConfigurarRAM("512GB");
-        builder.ConfigurarAlmacenamiento("2TB SSD");
-        builder.ConfigurarEsGamer(false);
-        return builder.BuilderComputadora();
+    }
+
+    public class Builder
+    {
+        private string _cpu;
+        private string _ram;
+        private string _almacenamiento;
+        private bool _esGamer;
+
+        public Builder ConfigurarCPU(string cpu)
+        {
+            _cpu = cpu;
+            return this;
+        }
+
+        public Builder ConfigurarRAM(string ram)
+        {
+            _ram = ram;
+            return this;
+        }
+
+        public Builder ConfigurarAlmacenamiento(string almacenamiento)
+        {
+            _almacenamiento = almacenamiento;
+            return this;
+        }
+
+        public Builder ConfigurarEsGamer(bool esGamer)
+        {
+            _esGamer = esGamer;
+            return this;
+        }
+
+        public ComputadoraRecord BuilderComputadora()
+        {
+            if (string.IsNullOrEmpty(_cpu))
+                throw new InvalidOperationException("CPU debe ser configurado");
+
+            return new ComputadoraRecord(_cpu, _ram, _almacenamiento, _esGamer);
+        }
     }
 }
