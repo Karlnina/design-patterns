@@ -20,20 +20,22 @@ Console.WriteLine("\nPresiona cualquier tecla para salir...");
 
 public sealed class LoggerManager
 {
-    // private static readonly Lazy<LoggerManager> _instance = new Lazy<LoggerManager>(() => new LoggerManager());
-
-    //  public static LoggerManager Instance => _instance.Value;
-
-    // public static LoggerManager Instance { get; } = Instance == null ? new LoggerManager() : Instance;
-
     private static LoggerManager _instance;
+    private static readonly object _lock = new object();
+
     public static LoggerManager Instance
     {
         get
         {
             if (_instance == null)
             {
-                _instance = new LoggerManager();
+                lock (_lock)
+                {
+                    if (_instance == null)
+                    {
+                        _instance = new LoggerManager();
+                    }
+                }
             }
             return _instance;
         }
