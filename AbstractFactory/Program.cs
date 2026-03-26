@@ -1,125 +1,127 @@
 ﻿// Programa de ejemplo para el patrón Abstract Factory
-var fabricaModerna = new ModernosFactory();
-var cliente1 = new Cliente(fabricaModerna);
-cliente1.MostrarMuebles();
 
-var fabricaVictoriana = new VictorianaFactory();
-var cliente2 = new Cliente(fabricaVictoriana);
-cliente2.MostrarMuebles();
+string configuracion = "AWS"; // Cambia a "Azure" para usar Azure
 
+Console.WriteLine("=== Cliente usando AWS ===");
+ICloudFactory awsFactory = new AWSFactory();
+Console.WriteLine("=== Cliente usando Azure ===");
+ICloudFactory azureFactory = new AzureFactory();
+
+if(configuracion == "AWS")
+{
+    ClienteCloud clienteAWS = new ClienteCloud(awsFactory);
+    clienteAWS.Ejecutar("datos_aws.txt");
+}
+else
+{
+    ClienteCloud clienteAzure = new ClienteCloud(azureFactory);
+    clienteAzure.Ejecutar("datos_azure.txt");
+}
+
+// ClienteCloud clienteAWS = new ClienteCloud(awsFactory);
+// clienteAWS.Ejecutar("datos_aws.txt");
+
+// ClienteCloud clienteAzure = new ClienteCloud(azureFactory);
+// clienteAzure.Ejecutar("datos_azure.txt");
 
 // -----------------------
-// interfaces para productos
-public interface ISilla
+
+// Productos/servicios abstractos
+public interface IAlmacenamiento
 {
-    void Describir();
+    void GuardarArchivo(string nombre);
 }
 
-public interface IMesa
+public interface IComputacion
 {
-    void Describir();
+    void EjecutarTarea();
 }
 
-// familia moderna
-public sealed class SillaModerna : ISilla
+// Familia AWS
+public sealed class AWSAlmacenamiento : IAlmacenamiento
 {
-    public void Describir()
+    public void GuardarArchivo(string nombre)
     {
-        Console.WriteLine("Soy una silla moderna");
+        Console.WriteLine($"Guardando {nombre} en AWS S3bucket.");
     }
 }
 
-public sealed class MesaModerna : IMesa
+public sealed class AWSComputacion : IComputacion
 {
-    public void Describir()
+    public void EjecutarTarea()
     {
-        Console.WriteLine("Soy una mesa moderna");
+        Console.WriteLine("Ejecutando tarea en AWS EC2(maquina virtual).");
     }
 }
 
-
-// familia victoriana
-public sealed class SillaVictoriana : ISilla
+// Familia Azure
+public sealed class AzureAlmacenamiento : IAlmacenamiento
 {
-    public void Describir()
+    public void GuardarArchivo(string nombre)
     {
-        Console.WriteLine("Soy una silla victoriana");
+        Console.WriteLine($"Guardando {nombre} en Azure Blob Storage.");
     }
 }
 
-public sealed class MesaVictoriana : IMesa
+public sealed class AzureComputacion : IComputacion
 {
-    public void Describir()
+    public void EjecutarTarea()
     {
-        Console.WriteLine("Soy una mesa victoriana");
+        Console.WriteLine("Ejecutando tarea en Azure Virtual Machine.");
     }
 }
 
-
-// fabrica abstracta
-public interface IMueblesFactory
+// Fábrica abstracta
+public interface ICloudFactory
 {
-    ISilla CrearSilla();
-    IMesa CrearMesa();
+    IAlmacenamiento CrearAlmacenamiento();
+    IComputacion CrearComputacion();
 }
 
-// fabrica concreta para muebles modernos
-public sealed class ModernosFactory : IMueblesFactory
+// Fábricas concretas
+public sealed class AWSFactory : ICloudFactory
 {
-    public ISilla CrearSilla()
+    public IAlmacenamiento CrearAlmacenamiento()
     {
-        return new SillaModerna();
+        return new AWSAlmacenamiento();
     }
 
-    public IMesa CrearMesa()
+    public IComputacion CrearComputacion()
     {
-        return new MesaModerna();
-    }
-}
-
-// fabrica concreta para muebles victorianos
-public sealed class VictorianaFactory : IMueblesFactory
-{
-    public ISilla CrearSilla()
-    {
-        return new SillaVictoriana();
-    }
-
-    public IMesa CrearMesa()
-    {
-        return new MesaVictoriana();
+        return new AWSComputacion();
     }
 }
 
-// fabrica de muebles personalizada
-// public sealed class PersonalizadaFactory : IMueblesFactory
-// {
-//     public ISilla CrearSilla()
-//     {        return new SillaPersonalizada();
-//     }
-
-//     public IMesa CrearMesa()
-//     {        return new MesaPersonalizada();
-//     }
-// }
-
-// cliente
-public class Cliente
+// Fábrica concreta Azure
+public sealed class AzureFactory : ICloudFactory
 {
-    private readonly ISilla _silla;
-    private readonly IMesa _mesa;
-
-    public Cliente(IMueblesFactory fabrica)
+    public IAlmacenamiento CrearAlmacenamiento()
     {
-        _silla = fabrica.CrearSilla();
-        _mesa = fabrica.CrearMesa();
+        return new AzureAlmacenamiento();
     }
 
-    public void MostrarMuebles()
+    public IComputacion CrearComputacion()
     {
-        Console.WriteLine("Muebles creados:");
-        _silla.Describir();
-        _mesa.Describir();
+        return new AzureComputacion();
     }
-
 }
+
+// Cliente
+public class ClienteCloud
+{
+    private readonly IAlmacenamiento _almacenamiento;
+    private readonly IComputacion _computacion;
+
+    public ClienteCloud(ICloudFactory factory)
+    {
+        _almacenamiento = factory.CrearAlmacenamiento();
+        _computacion = factory.CrearComputacion();
+    }
+
+    public void Ejecutar(string nombreArchivo)
+    {
+        _almacenamiento.GuardarArchivo(nombreArchivo);
+        _computacion.EjecutarTarea();
+    }
+}
+
