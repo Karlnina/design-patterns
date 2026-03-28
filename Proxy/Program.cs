@@ -2,13 +2,13 @@
 using System.Diagnostics;
 
 Console.WriteLine("Creando proxy para la base de datos...");
-IDatabaseReader databaseReader = new CacheDatabaseReader();
+IDatabaseReader databaseReader = new CacheDatabaseReader("Analista");
 Stopwatch stopwatch = Stopwatch.StartNew();
 
 stopwatch.Start();
 
 // primera llamada, se obtiene del sujeto real
-Console.WriteLine("Primera llamada a GetData...");
+Console.WriteLine("Primera llamada a GetData... analizando rol: Analista");
 string resultQuery = databaseReader.GetData("SELECT * FROM heavy_table");
 Console.WriteLine("Resultado: " + resultQuery);
 stopwatch.Stop();
@@ -30,10 +30,22 @@ Console.WriteLine("Resultado: " + resultQuery);
 stopwatch.Stop();
 Console.WriteLine($"Tiempo transcurrido: {stopwatch.ElapsedMilliseconds} ms");
 
- string removeResult = databaseReader.RemoveData("temaX");
-Console.WriteLine("Resultado: " + removeResult);
-resultQuery = databaseReader.GetData("temaX");
+IDatabaseReader adminDatabaseReader = new CacheDatabaseReader("Admin");
+stopwatch.Restart();
+Console.WriteLine("\nLlamada a GetData con rol Admin...");
+resultQuery = adminDatabaseReader.GetData("SELECT * FROM heavy_table");
 Console.WriteLine("Resultado: " + resultQuery);
+stopwatch.Stop();
+Console.WriteLine($"Tiempo transcurrido: {stopwatch.ElapsedMilliseconds} ms");
+
+IDatabaseReader sinAccesoDatabaseReader = new CacheDatabaseReader("Usuario");
+stopwatch.Restart();
+Console.WriteLine("\nLlamada a GetData con rol sin acceso...");
+resultQuery = sinAccesoDatabaseReader.GetData("SELECT * FROM heavy_table");
+Console.WriteLine("Resultado: " + resultQuery);
+stopwatch.Stop();
+Console.WriteLine($"Tiempo transcurrido: {stopwatch.ElapsedMilliseconds} ms");
+
 // ---------------------------------------
 // Interfaz: Contrato común para el sujeto real y el proxy
 public interface IDatabaseReader
@@ -66,12 +78,40 @@ public class CacheDatabaseReader : IDatabaseReader
     private readonly Lazy<HevyDatabaseReader> _realReader = new Lazy<HevyDatabaseReader>();
     private readonly Dictionary<string, string> _cache = new Dictionary<string, string>();
 
+    private const string RolAmin = "Admin";
+    private const string RolAnalista = "Analista";
+
+    private readonly string _role;
+    public CacheDatabaseReader(string role)
+    {
+        _role = role;
+    }
+
     public string GetData(string query)
     {
-        Console.WriteLine("Interceptando llamada a GetData con query: " + query);
-        if (!_cache.TryGetValue(query, out var cachedData))
+        if (_role != RolAmin && _role != RolAnalista)
         {
+            return "Acceso denegado: 403 rol no autorizado";
+        }
 
+        if (_role == RolAnalista)
+        {
+            Console.WriteLine("Interceptando llamada a GetData con query: " + query);
+            if (!_cache.TryGetValue(query, out var cachedData))
+            {
+
+                // aplicacion legacy, donde no se puede modificar el código del cliente, pero se desea mejorar el rendimiento con caching
+                Console.WriteLine("No se encontró en caché, obteniendo datos del sujeto real...");
+                var data = _realReader.Value.GetData(query);
+                _cache[query] = data; // Almacena en caché
+                return data;
+            }
+            Console.WriteLine("Devolviendo datos desde la caché");
+            return cachedData;
+        }
+
+        if (_role == RolAmin)
+        {
             // aplicacion legacy, donde no se puede modificar el código del cliente, pero se desea mejorar el rendimiento con caching
             Console.WriteLine("No se encontró en caché, obteniendo datos del sujeto real...");
             var data = _realReader.Value.GetData(query);
@@ -79,8 +119,8 @@ public class CacheDatabaseReader : IDatabaseReader
             return data;
         }
 
-        Console.WriteLine("Devolviendo datos desde la caché");
-        return cachedData;
+        return "Acceso denegado: 403 rol no autorizado";
+
     }
 
     public string RemoveData(string query)
