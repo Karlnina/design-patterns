@@ -24,6 +24,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Command", "Command\Command.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Strategy", "Strategy\Strategy.csproj", "{86FA7821-A33F-4C72-89B3-ABA43A671CBE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Observer", "Observer\Observer.csproj", "{CD8EB0AD-3E71-4D41-B345-37535E45688C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -74,6 +76,10 @@ Global
 		{86FA7821-A33F-4C72-89B3-ABA43A671CBE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{86FA7821-A33F-4C72-89B3-ABA43A671CBE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{86FA7821-A33F-4C72-89B3-ABA43A671CBE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CD8EB0AD-3E71-4D41-B345-37535E45688C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CD8EB0AD-3E71-4D41-B345-37535E45688C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CD8EB0AD-3E71-4D41-B345-37535E45688C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CD8EB0AD-3E71-4D41-B345-37535E45688C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
